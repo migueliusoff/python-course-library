@@ -39,6 +39,8 @@ class AddBooksMixin:
 
 
 class GetBooksMixin:
+    """Миксин для реализации получения книг. Предполагается наличие у класса вложенной сущности с книгами"""
+
     def get_books(self):
         books = []
         for place_to_put in getattr(self, self._place_to_put_attr):
@@ -48,6 +50,8 @@ class GetBooksMixin:
 
 
 class DeleteBooksMixin:
+    """Миксин для реализации удаления книги. Предполагается наличие у класса вложенной сущности с книгами"""
+
     def remove_book(self, book):
         for place_to_put in getattr(self, self._place_to_put_attr):
             if book in place_to_put.get_books():
@@ -56,4 +60,6 @@ class DeleteBooksMixin:
 
 
 class BooksMixin(AddBooksMixin, GetBooksMixin, DeleteBooksMixin):
+    """Миксин с реализацией всех операций по книгам: добавление, удаление, получение"""
+
     pass
