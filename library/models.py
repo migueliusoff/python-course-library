@@ -1,4 +1,4 @@
-from library.mixins import AddBooksMixin, GetBooksMixin
+from library.mixins import BooksMixin
 
 
 class Book:
@@ -24,12 +24,12 @@ class Shelf:
 
     _book_limit = 10
 
-    def __init__(self, *books: tuple[Book] | None):
+    def __init__(self, *books: Book | None):
         if len(books) > Shelf._book_limit:
             raise ValueError("На полке не может храниться больше 10 книг")
         self.books = list(books)
 
-    def add_books(self, *books: tuple[Book] | None):
+    def add_books(self, *books: Book | None):
         """Добавление книг
 
         :param books: Книги
@@ -45,6 +45,9 @@ class Shelf:
         :return:
         """
         return self.books
+
+    def remove_book(self, book: Book):
+        self.books.remove(book)
 
     @classmethod
     def get_capacity(cls) -> int:
@@ -62,14 +65,14 @@ class Shelf:
         return self._book_limit - len(self.books)
 
     def __str__(self) -> str:
-        books_str = "; ".join(str(book) for book in self.books)
+        books_str = ", ".join(str(book) for book in self.books)
         return f"Полка с книгами: {books_str}"
 
     def __repr__(self) -> str:
         return str(self)
 
 
-class Rack(AddBooksMixin, GetBooksMixin):
+class Rack(BooksMixin):
     """Стеллаж"""
 
     _place_to_put_attr = "_shelves"
@@ -99,7 +102,7 @@ class Rack(AddBooksMixin, GetBooksMixin):
         return str(self)
 
 
-class Hall(AddBooksMixin, GetBooksMixin):
+class Hall(BooksMixin):
     """Зал"""
 
     _place_to_put_attr = "_racks"

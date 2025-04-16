@@ -45,3 +45,15 @@ class GetBooksMixin:
             books.extend(place_to_put.get_books())
 
         return books
+
+
+class DeleteBooksMixin:
+    def remove_book(self, book):
+        for place_to_put in getattr(self, self._place_to_put_attr):
+            if book in place_to_put.get_books():
+                place_to_put.remove_book(book)
+                break
+
+
+class BooksMixin(AddBooksMixin, GetBooksMixin, DeleteBooksMixin):
+    pass
