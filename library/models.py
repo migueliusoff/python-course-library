@@ -57,3 +57,20 @@ class Rack:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+class Hall:
+    """Зал"""
+
+    def __init__(self):
+        self.racks = [Rack() for i in range(10)]
+
+    def __str__(self) -> str:
+        racks_str = ""
+        for i, rack in enumerate(self.racks):
+            racks_str += f"{i}. {rack}\n"
+
+        return f"Зал:\n{racks_str}"
+
+    def __repr__(self) -> str:
+        return str(self)
