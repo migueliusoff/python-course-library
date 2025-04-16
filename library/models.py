@@ -41,6 +41,10 @@ class Shelf:
 
     @classmethod
     def get_capacity(cls) -> int:
+        """Узнать вмещаемость полки
+
+        :return: Вмещаемость полки
+        """
         return cls._book_limit
 
     def get_free_space(self) -> int:
@@ -80,6 +84,10 @@ class Rack(AddBooksMixin):
 
     @classmethod
     def get_capacity(cls) -> int:
+        """Узнать вмещаемость стеллажа
+
+        :return: Вмещаемость
+        """
         return cls._shelf_limit * Shelf.get_capacity()
 
     def __str__(self) -> str:
