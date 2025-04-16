@@ -36,3 +36,12 @@ class AddBooksMixin:
             free_space += place_to_put.get_free_space()
 
         return free_space
+
+
+class GetBooksMixin:
+    def get_books(self):
+        books = []
+        for place_to_put in getattr(self, self._place_to_put_attr):
+            books.extend(place_to_put.get_books())
+
+        return books
