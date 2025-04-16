@@ -40,3 +40,20 @@ class Shelf:
 
     def __repr__(self) -> str:
         return str(self)
+
+
+class Rack:
+    """Стеллаж"""
+
+    def __init__(self):
+        self.shelves = [Shelf() for i in range(10)]
+
+    def __str__(self) -> str:
+        shelves_str = ""
+        for i, shelf in enumerate(self.shelves):
+            shelves_str += f"{i}. {shelf}\n"
+
+        return f"Стеллаж:\n{shelves_str}"
+
+    def __repr__(self) -> str:
+        return str(self)
