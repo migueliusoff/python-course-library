@@ -18,13 +18,11 @@ class AddBooksMixin:
             raise ValueError("Закончилось место для книг")
 
         offset = 0
-        added_books_count = 0
-        while added_books_count < len(books):
+        while offset < len(books):
             for place_to_put in getattr(self, self._place_to_put_attr):
                 free_space = place_to_put.get_free_space()
                 place_to_put.add_books(*books[offset : offset + free_space])
                 offset += free_space
-                added_books_count += free_space
 
     def get_free_space(self) -> int:
         """Узнать, сколько места осталось
