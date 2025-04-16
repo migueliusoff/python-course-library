@@ -13,7 +13,7 @@ class Book:
         Book._book_index += 1
 
     def __str__(self) -> str:
-        return f"{self.title}, {self.author}, №{self.index}"
+        return f'№{self.index} {self.author} "{self.title}"'
 
     def __repr__(self) -> str:
         return str(self)
