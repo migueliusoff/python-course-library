@@ -71,17 +71,6 @@ class Rack(AddBooksMixin):
     def __init__(self):
         self._shelves = [Shelf() for _ in range(Rack._shelf_limit)]
 
-    def get_free_space(self) -> int:
-        """Узнать, сколько места осталось на всех полках
-
-        :return: Кол-во свободных мест на стеллаже
-        """
-        free_space = 0
-        for shelf in self._shelves:
-            free_space += shelf.get_free_space()
-
-        return free_space
-
     @classmethod
     def get_capacity(cls) -> int:
         """Узнать вмещаемость стеллажа
@@ -111,16 +100,6 @@ class Hall(AddBooksMixin):
 
     def __init__(self):
         self._racks = [Rack() for _ in range(Hall._rack_limit)]
-
-    def get_free_space(self) -> int:
-        """Получить кол-во свободных мест в зале
-
-        :return: Кол-во свободых мест в зале
-        """
-        free_space = 0
-        for rack in self._racks:
-            free_space += rack.get_free_space()
-        return free_space
 
     def __str__(self) -> str:
         racks_str = ""
