@@ -10,7 +10,7 @@ def generate_books(count: int) -> list[Book]:
 def test_create_shelf_with_books_success():
     books = generate_books(3)
     shelf = Shelf(*books)
-    assert shelf.books == books
+    assert shelf.get_books() == books
 
 
 def test_create_shelf_with_books_fail():
@@ -24,7 +24,7 @@ def test_add_book_success():
     books = generate_books(5)
     shelf = Shelf()
     shelf.add_books(*books)
-    assert shelf.books == books
+    assert shelf.get_books() == books
 
 
 def test_add_book_fail():

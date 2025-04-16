@@ -17,3 +17,11 @@ def test_add_books_fail():
     with pytest.raises(ValueError) as error:
         hall.add_books(*books)
     assert str(error.value) == "Закончилось место для книг"
+
+
+def test_remove_books():
+    hall = Hall()
+    books = generate_books(hall.get_free_space())
+    hall.add_books(*books)
+    hall.remove_book(books[0])
+    assert hall.get_free_space() == 1

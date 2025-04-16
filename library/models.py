@@ -27,7 +27,7 @@ class Shelf:
     def __init__(self, *books: Book | None):
         if len(books) > Shelf._book_limit:
             raise ValueError("На полке не может храниться больше 10 книг")
-        self.books = list(books)
+        self._books = list(books)
 
     def add_books(self, *books: Book | None):
         """Добавление книг
@@ -35,19 +35,19 @@ class Shelf:
         :param books: Книги
         :return:
         """
-        if len(books) + len(self.books) > self._book_limit:
+        if len(books) + len(self._books) > self._book_limit:
             raise ValueError("На полке не может храниться больше 10 книг")
-        self.books.extend(books)
+        self._books.extend(books)
 
     def get_books(self):
         """Получение книг
 
         :return:
         """
-        return self.books
+        return self._books
 
     def remove_book(self, book: Book):
-        self.books.remove(book)
+        self._books.remove(book)
 
     @classmethod
     def get_capacity(cls) -> int:
@@ -62,10 +62,10 @@ class Shelf:
 
         :return: Кол-во свободных мест
         """
-        return self._book_limit - len(self.books)
+        return self._book_limit - len(self._books)
 
     def __str__(self) -> str:
-        books_str = ", ".join(str(book) for book in self.books)
+        books_str = ", ".join(str(book) for book in self._books)
         return f"Полка с книгами: {books_str}"
 
     def __repr__(self) -> str:
