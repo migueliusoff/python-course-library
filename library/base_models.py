@@ -60,16 +60,6 @@ class BookStorage:
 
         raise NotImplementedError
 
-    def sort(self) -> None:
-        """
-        Упорядочивание. Все книги, которые есть в залах - последовательно расставляют по году издания,
-        внутри года - по названию
-
-        :raises NotImplementedError: Метод не реализован
-        """
-
-        raise NotImplementedError
-
     def remove_all_books(self) -> None:
         """
         Удаление всех книг
@@ -158,6 +148,11 @@ class CompositeBookStorage(BookStorage):
             storage.remove_all_books()
 
     def sort(self) -> None:
+        """
+        Упорядочивание. Все книги, которые есть в залах - последовательно расставляют по году издания,
+        внутри года - по названию
+        """
+
         sorted_books = sorted(self.books, key=operator.attrgetter("year", "title"))
         self.remove_all_books()
         for book in sorted_books:
