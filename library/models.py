@@ -1,68 +1,84 @@
-from library.mixins import BooksMixin
+from library.archive import archive
+from library.base_models import BookStorage, CompositeBookStorage
+from library.exceptions import BookComparisonNotAllowed, BookStorageIsFull
 
 
 class Book:
     """Книга"""
 
-    _book_index = 0
-
-    def __init__(self, title: str, author: str):
+    def __init__(self, title: str, uid: str, author: str, year: int) -> None:
         self.title = title
         self.author = author
-        self.index = Book._book_index
-        Book._book_index += 1
+        self.uid = uid
+        self.year = year
+
+    def __eq__(self, obj: object) -> bool:
+        """
+        Магический метод для сравнения книг. Сравниваем книги по uid
+
+        :param obj: Объект для сравнения
+        :return: Равны ли объекты
+        :raises BookComparisonNotAllowed: Ошибка о сравнении книги с объектом другого типа
+        """
+        if not isinstance(obj, Book):
+            raise BookComparisonNotAllowed()
+
+        return self.uid == obj.uid
 
     def __str__(self) -> str:
-        return f'№{self.index} {self.author} "{self.title}"'
+        return f'№{self.uid} {self.author} "{self.title}" {self.year}г.'
 
     def __repr__(self) -> str:
         return str(self)
 
 
-class Shelf:
-    """Полка"""
+class Archive(BookStorage):
+    """Архив"""
 
-    _book_limit = 10
+    def __init__(self) -> None:
+        self._books = []
 
-    def __init__(self, *books: Book | None):
-        if len(books) > Shelf._book_limit:
-            raise ValueError("На полке не может храниться больше 10 книг")
-        self._books = list(books)
+    def add_book(self, book: Book) -> None:
+        self._books.append(book)
 
-    def add_books(self, *books: Book | None):
-        """Добавление книг
-
-        :param books: Книги
-        :return:
-        """
-        if len(books) + len(self._books) > self._book_limit:
-            raise ValueError("На полке не может храниться больше 10 книг")
-        self._books.extend(books)
-
-    def get_books(self):
-        """Получение книг
-
-        :return:
-        """
+    @property
+    def books(self) -> list[Book]:
         return self._books
 
-    def remove_book(self, book: Book):
-        self._books.remove(book)
 
-    @classmethod
-    def get_capacity(cls) -> int:
-        """Узнать вмещаемость полки
+class Shelf(BookStorage):
+    """Полка"""
 
-        :return: Вмещаемость полки
-        """
-        return cls._book_limit
+    def __init__(self, archive: BookStorage, limit: int = 10) -> None:
+        self._limit = limit
+        self._books = []
+        self._archive = archive
 
-    def get_free_space(self) -> int:
-        """Получить кол-во свободных мест на полке
+    @property
+    def is_available(self) -> bool:
+        return len(self._books) < self._limit
 
-        :return: Кол-во свободных мест
-        """
-        return self._book_limit - len(self._books)
+    def add_book(self, book: Book) -> None:
+        if not self.is_available:
+            raise BookStorageIsFull()
+
+        self._books.append(book)
+
+    @property
+    def books(self) -> list[Book]:
+        return self._books
+
+    def remove_book(self, book: Book) -> None:
+        if book in self._books:
+            self._books.remove(book)
+
+    def archive_books(self, year: int) -> None:
+        for book in (b for b in self._books if b.year < year):
+            self._books.remove(book)
+            self._archive.add_book(book)
+
+    def remove_all_books(self) -> None:
+        self._books = []
 
     def __str__(self) -> str:
         books_str = ", ".join(str(book) for book in self._books)
@@ -72,53 +88,57 @@ class Shelf:
         return str(self)
 
 
-class Rack(BooksMixin):
+class Rack(CompositeBookStorage):
     """Стеллаж"""
 
-    _place_to_put_attr = "_shelves"
-    _shelf_limit = 10
-
-    def __init__(self):
-        self._shelves = [Shelf() for _ in range(Rack._shelf_limit)]
-
-    @classmethod
-    def get_capacity(cls) -> int:
-        """Узнать вмещаемость стеллажа
-
-        :return: Вмещаемость
-        """
-        return cls._shelf_limit * Shelf.get_capacity()
+    def _init_storages(self) -> None:
+        self._storages = [Shelf(archive) for _ in range(self._limit)]
 
     def __str__(self) -> str:
-        shelves_str = ""
-        for shelf in self._shelves:
-            if shelf.get_free_space() == Shelf.get_capacity():
-                continue
-            shelves_str += f"\t- {shelf}\n"
+        storages_str = ""
+        for storage in self._storages:
+            storages_str += f"\t- {storage}\n"
 
-        return f"Стеллаж:\n{shelves_str}"
+        return f"Стеллаж:\n{storages_str}"
 
     def __repr__(self) -> str:
         return str(self)
 
 
-class Hall(BooksMixin):
+class Hall(CompositeBookStorage):
     """Зал"""
 
-    _place_to_put_attr = "_racks"
-    _rack_limit = 10
-
-    def __init__(self):
-        self._racks = [Rack() for _ in range(Hall._rack_limit)]
+    def _init_storages(self) -> None:
+        self._storages = [Rack(archive) for _ in range(self._limit)]
 
     def __str__(self) -> str:
-        racks_str = ""
-        for rack in self._racks:
-            if rack.get_free_space() == Rack.get_capacity():
-                continue
-            racks_str += f"- {rack}\n"
+        storages_str = ""
+        for storage in self._storages:
+            storages_str += f"- {storage}\n"
 
-        return f"Зал:\n{racks_str}"
+        return f"Зал:\n{storages_str}"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class Library(CompositeBookStorage):
+    """Библиотека"""
+
+    def add_book(self, book) -> None:
+        if not self.get_available_storage():
+            self._storages.append(Hall(archive))
+        super().add_book(book)
+
+    def _init_storages(self) -> None:
+        self._storages = [Hall(archive)]
+
+    def __str__(self) -> str:
+        storages_str = ""
+        for storage in self._storages:
+            storages_str += f"- {storage}\n"
+
+        return f"Библиотека:\n{storages_str}"
 
     def __repr__(self) -> str:
         return str(self)
